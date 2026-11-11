@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Network Security Scanner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🛡 Network Security Scanner</h1>
+
+        <p class="subtitle">
+            Scan an authorized target for open network ports
+            and potential security issues.
+        </p>
+
+        <div class="scan-box">
+
+            <h2>Start a Scan</h2>
+
+            <form action="/scan" method="GET">
+
+                <label for="target">Target IP Address</label>
+
+                <input
+                    type="text"
+                    id="target"
+                    name="target"
+                    placeholder="192.168.56.101"
+                    required
+                >
+
+                <button type="submit">Start Scan</button>
+
+            </form>
+
+        </div>
+
+        <p class="notice">
+            Only scan systems you own or have permission to test.
+        </p>
+
+    </div>
+
+</body>
+</html>

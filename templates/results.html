@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scan Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <h1>Network Security Scanner</h1>
+
+    <h2>Scan Results</h2>
+    {% if error %}
+    <div class="error">
+        ⚠ {{ error }}
+    </div>
+{% endif %}
+
+    <div class="summary">
+        <h3>Open Ports Found: {{ open_ports }}</h3>
+        <h3>
+    Risk Level:
+    <span class="risk-{{ risk_level|lower }}">
+        {{ risk_level }}
+    </span>
+</h3>
+    </div>
+
+    {% for result in results %}
+        <div class="result-card">
+            <h3>Port {{ result.port }}</h3>
+
+            <p>Service: {{ result.service }}</p>
+
+            <p class="open">● OPEN</p>
+
+            {% if result.warning %}
+                <p class="warning">⚠ {{ result.warning }}</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+    {% if open_ports == 0 and not error %}
+    <div class="no-results">
+        <p>✓ No open ports detected.</p>
+    </div>
+{% endif %}
+<a href="/" class="back-button">← Scan Another Target</a>
+</body>
+</html>
