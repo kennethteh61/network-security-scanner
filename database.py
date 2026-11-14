@@ -1,7 +1,7 @@
 
 import sqlite3
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 DATABASE_NAME = "scan_history.db"
@@ -119,6 +119,59 @@ def get_dashboard_stats():
         if risk in risk_distribution:
             risk_distribution[risk] = count
 
+    # Count how frequently each open port is detected
+    cursor.execute("SELECT results FROM scan_history")
+    all_results = cursor.fetchall()
+
+    port_counts = {}
+
+    for row in all_results:
+        scan_results = json.loads(row["results"])
+
+        for result in scan_results:
+            port = result["port"]
+
+            if port not in port_counts:
+                port_counts[port] = 0
+
+            port_counts[port] += 1
+
+    # Get the five most frequently detected ports
+    top_ports = sorted(
+        port_counts.items(),
+        key=lambda item: item[1],
+        reverse=True
+    )[:5]
+
+    port_statistics = [
+        {"port": port, "count": count}
+        for port, count in top_ports
+    ]
+
+    # Scan activity over the past seven days
+    today = datetime.now().date()
+    start_date = today - timedelta(days=6)
+
+    cursor.execute("""
+        SELECT SUBSTR(scan_date, 1, 10), COUNT(*)
+        FROM scan_history
+        WHERE scan_date >= ?
+        GROUP BY SUBSTR(scan_date, 1, 10)
+    """, (start_date.strftime("%Y-%m-%d"),))
+
+    daily_data = dict(cursor.fetchall())
+
+    activity_statistics = []
+
+    for i in range(7):
+        current_date = start_date + timedelta(days=i)
+        date_key = current_date.strftime("%Y-%m-%d")
+
+        activity_statistics.append({
+            "date": current_date.strftime("%d %b"),
+            "count": daily_data.get(date_key, 0)
+        })
+
     # Retrieve the five most recent scans
     cursor.execute("""
         SELECT * FROM scan_history
@@ -135,5 +188,7 @@ def get_dashboard_stats():
         "high_risk_scans": high_risk_scans,
         "unique_targets": unique_targets,
         "recent_scans": recent_scans,
-        "risk_distribution": risk_distribution
+        "risk_distribution": risk_distribution,
+        "port_statistics": port_statistics,
+        "activity_statistics": activity_statistics
     }

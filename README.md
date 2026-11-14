@@ -49,6 +49,15 @@ The application uses a basic rule-based classification:
 
 *Note: This is a basic indicator based on selected ports, not a comprehensive vulnerability assessment.*
 
+
+### Service and Version Detection
+- Performs TCP banner grabbing on open ports.
+- Attempts to identify running service software and versions.
+- Supports HTTP Server header detection.
+- Supports HTTPS service identification through TLS.
+- Displays detected service information alongside scan results.
+- Reports unknown versions when services do not disclose identifying information.
+
 ## Installation and Setup
 
 ### 1. Clone the repository

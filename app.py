@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from scanner import scan_target
 from database import (
     create_database,
@@ -52,6 +52,29 @@ def scan():
         target=target
     )
 
+
+@app.route("/api/scan", methods=["GET"])
+def api_scan():
+    target = request.args.get("target", "").strip()
+
+    scan_data = scan_target(target)
+
+    if scan_data["risk_level"] == "INVALID":
+        return jsonify({
+            "success": False,
+            "error": "Please enter a valid IP address."
+        }), 400
+
+    # Save completed scan
+    save_scan(target, scan_data)
+
+    return jsonify({
+        "success": True,
+        "target": target,
+        "results": scan_data["results"],
+        "open_ports": scan_data["open_ports"],
+        "risk_level": scan_data["risk_level"]
+    })
 
 @app.route("/history")
 def history():

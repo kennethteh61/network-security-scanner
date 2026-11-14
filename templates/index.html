@@ -91,35 +91,79 @@
         </section>
 
 
-        <!-- New Scan -->
-        <section class="scan-section" id="new-scan">
+        
+<!-- New Scan / Scan Results -->
+<section class="scan-section" id="new-scan">
 
-            <div class="section-heading">
-                <div>
-                    <h2>Start a New Scan</h2>
-                    <p>Enter an authorized IPv4 address to check its common ports.</p>
-                </div>
-                <span class="status-indicator">● Scanner Ready</span>
+    <!-- Scanning Form -->
+    <div id="scanFormSection">
+
+        <div class="section-heading">
+            <div>
+                <h2>Start a New Scan</h2>
+                <p>Enter an authorized IPv4 address to check its common ports.</p>
             </div>
+            <span class="status-indicator">● Scanner Ready</span>
+        </div>
 
-            <form action="/scan" method="GET" id="scanForm" class="dashboard-form">
-                <input
-                    type="text"
-                    name="target"
-                    placeholder="Enter target IP address (e.g. 192.168.56.101)"
-                    required
-                >
+        <form id="scanForm" class="dashboard-form">
+            <input
+                type="text"
+                id="targetInput"
+                name="target"
+                placeholder="Enter target IP address (e.g. 192.168.56.101)"
+                required
+            >
 
-                <button type="submit" id="scanButton">
-                    Start Scan →
-                </button>
-            </form>
+            <button type="submit" id="scanButton">
+                Start Scan →
+            </button>
+        </form>
 
-            <p class="scan-notice">
-                Only scan systems you own or have permission to test.
-            </p>
+        <p class="scan-notice">
+            Only scan systems you own or have permission to test.
+        </p>
 
-        </section>
+    </div>
+
+
+    <!-- Scan Results -->
+    <div id="scanResultsSection" style="display: none;">
+
+        <div class="section-heading">
+            <div>
+                <h2>Scan Results</h2>
+                <p id="resultTarget"></p>
+            </div>
+            <span class="status-indicator">● Scan Completed</span>
+        </div>
+
+        <div class="summary">
+            <h3>Open Ports Found: <span id="resultOpenPorts">0</span></h3>
+
+            <h3>
+                Risk Level:
+                <span id="resultRiskLevel"></span>
+            </h3>
+        </div>
+
+        <div id="resultList"></div>
+
+        <div id="noResultsMessage" class="no-results" style="display: none;">
+            <p>✓ No open ports detected.</p>
+        </div>
+
+        <button type="button" id="scanAgainButton" class="scan-again-button">
+            ↻ Scan Another Target
+        </button>
+
+    </div>
+
+    <!-- Error Message -->
+    <div id="scanError" class="error" style="display: none;"></div>
+
+</section>
+
 
 
 <!-- Risk Distribution Chart -->
@@ -134,6 +178,40 @@
 
     <div class="chart-container">
         <canvas id="riskChart"></canvas>
+    </div>
+
+</section>
+
+
+<!-- Most Frequently Detected Ports -->
+<section class="activity-section">
+
+    <div class="section-heading">
+        <div>
+            <h2>Most Frequently Detected Ports</h2>
+            <p>Top five ports detected across previous scans.</p>
+        </div>
+    </div>
+
+    <div class="port-chart-container">
+        <canvas id="portChart"></canvas>
+    </div>
+
+</section>
+
+
+<!-- Scan Activity Chart -->
+<section class="activity-section">
+
+    <div class="section-heading">
+        <div>
+            <h2>Scan Activity</h2>
+            <p>Number of scans performed over the past seven days.</p>
+        </div>
+    </div>
+
+    <div class="activity-chart-container">
+        <canvas id="activityChart"></canvas>
     </div>
 
 </section>
@@ -203,14 +281,114 @@
 
 
 <!-- Scanning Button Animation -->
-<script>
-    document.getElementById("scanForm").addEventListener("submit", function() {
-        const button = document.getElementById("scanButton");
 
-        button.textContent = "Scanning...";
-        button.disabled = true;
+<script>
+    const scanForm = document.getElementById("scanForm");
+    const scanButton = document.getElementById("scanButton");
+    const targetInput = document.getElementById("targetInput");
+
+    const scanFormSection = document.getElementById("scanFormSection");
+    const scanResultsSection = document.getElementById("scanResultsSection");
+    const scanError = document.getElementById("scanError");
+
+    const scanAgainButton = document.getElementById("scanAgainButton");
+
+    scanForm.addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const target = targetInput.value.trim();
+
+        scanButton.textContent = "Scanning...";
+        scanButton.disabled = true;
+        scanError.style.display = "none";
+
+        try {
+            const response = await fetch(
+                `/api/scan?target=${encodeURIComponent(target)}`
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || "Unable to complete the scan.");
+            }
+
+            document.getElementById("resultTarget").textContent =
+                "Target: " + data.target;
+
+            document.getElementById("resultOpenPorts").textContent =
+                data.open_ports;
+
+            const riskElement = document.getElementById("resultRiskLevel");
+            riskElement.textContent = data.risk_level;
+            riskElement.className = "risk-" + data.risk_level.toLowerCase();
+
+            const resultList = document.getElementById("resultList");
+            resultList.innerHTML = "";
+
+            const noResultsMessage =
+                document.getElementById("noResultsMessage");
+
+            if (data.results.length === 0) {
+                noResultsMessage.style.display = "block";
+            } else {
+                noResultsMessage.style.display = "none";
+
+                data.results.forEach(result => {
+                    const card = document.createElement("div");
+                    card.className = "result-card";
+
+                    const heading = document.createElement("h3");
+                    heading.textContent = "Port " + result.port;
+
+                    const service = document.createElement("p");
+                    service.textContent = "Service: " + result.service;
+
+                    const version = document.createElement("p");
+                    version.textContent = "Version: " + (result.version || "Unknown");
+
+                    const status = document.createElement("p");
+                    status.className = "open";
+                    status.textContent = "● OPEN";
+
+                    card.appendChild(heading);
+                    card.appendChild(service);
+                    card.appendChild(version);
+                    card.appendChild(status);
+
+                    if (result.warning) {
+                        const warning = document.createElement("p");
+                        warning.className = "warning";
+                        warning.textContent = "⚠ " + result.warning;
+                        card.appendChild(warning);
+                    }
+
+                    resultList.appendChild(card);
+                });
+            }
+
+            scanFormSection.style.display = "none";
+            scanResultsSection.style.display = "block";
+
+        } catch (error) {
+            scanError.textContent = "⚠ " + error.message;
+            scanError.style.display = "block";
+        } finally {
+            scanButton.textContent = "Start Scan →";
+            scanButton.disabled = false;
+        }
+    });
+
+    scanAgainButton.addEventListener("click", function() {
+        scanResultsSection.style.display = "none";
+        scanFormSection.style.display = "block";
+
+        scanForm.reset();
+        scanError.style.display = "none";
+        targetInput.focus();
     });
 </script>
+
 
 
 <script>
@@ -260,6 +438,130 @@
             },
 
             cutout: "70%"
+        }
+    });
+</script>
+
+
+<script>
+    const portData = {{ stats.port_statistics | tojson }};
+
+    const portChart = document.getElementById("portChart");
+
+    new Chart(portChart, {
+        type: "bar",
+
+        data: {
+            labels: portData.map(item => "Port " + item.port),
+
+            datasets: [{
+                label: "Detection Count",
+
+                data: portData.map(item => item.count),
+
+                backgroundColor: "#38bdf8",
+                borderRadius: 6,
+                barThickness: 30
+            }]
+        },
+
+        options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: "#94a3b8",
+                        precision: 0
+                    },
+                    grid: {
+                        color: "#263449"
+                    }
+                },
+
+                y: {
+                    ticks: {
+                        color: "#cbd5e1"
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+<script>
+    const activityData = {{ stats.activity_statistics | tojson }};
+
+    const activityChart = document.getElementById("activityChart");
+
+    new Chart(activityChart, {
+        type: "line",
+
+        data: {
+            labels: activityData.map(item => item.date),
+
+            datasets: [{
+                label: "Scans Performed",
+
+                data: activityData.map(item => item.count),
+
+                borderColor: "#38bdf8",
+                backgroundColor: "rgba(56, 189, 248, 0.15)",
+
+                fill: true,
+                tension: 0.4,
+
+                pointBackgroundColor: "#38bdf8",
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            plugins: {
+                legend: {
+                    labels: {
+                        color: "#cbd5e1"
+                    }
+                }
+            },
+
+            scales: {
+                x: {
+                    ticks: {
+                        color: "#94a3b8"
+                    },
+                    grid: {
+                        color: "#263449"
+                    }
+                },
+
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: "#94a3b8",
+                        precision: 0
+                    },
+                    grid: {
+                        color: "#263449"
+                    }
+                }
+            }
         }
     });
 </script>
