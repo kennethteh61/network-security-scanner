@@ -71,6 +71,30 @@ def get_scan_history():
     return history
 
 
+def get_scan_by_id(scan_id):
+    """Retrieve one previous scan using its unique ID."""
+
+    connection = sqlite3.connect(DATABASE_NAME)
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT * FROM scan_history
+        WHERE id = ?
+    """, (scan_id,))
+
+    scan = cursor.fetchone()
+    connection.close()
+
+    if scan is None:
+        return None
+
+    # Convert stored JSON results back into a Python list.
+    scan = dict(scan)
+    scan["results"] = json.loads(scan["results"])
+
+    return scan
+
 def get_dashboard_stats():
     """Retrieve statistics for the main dashboard."""
 

@@ -238,6 +238,7 @@
                             <th>Date & Time</th>
                             <th>Open Ports</th>
                             <th>Risk Level</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
 
@@ -251,6 +252,12 @@
                                 <span class="risk-badge risk-{{ scan['risk_level']|lower }}">
                                     {{ scan["risk_level"] }}
                                 </span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('scan_details', scan_id=scan['id']) }}"
+                                class="details-button">
+                                    View Details →
+                                </a>
                             </td>
                         </tr>
                         {% endfor %}

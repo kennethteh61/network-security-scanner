@@ -4,54 +4,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scan History | Network Security Scanner</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <title>Scan History | NetSecure</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
-    <div class="container">
-        <h1>🛡 Network Security Scanner</h1>
-        <h2>Scan History</h2>
+<div class="dashboard">
 
-        <p>View your previous network security scans.</p>
+    <!-- Sidebar -->
+    <aside class="sidebar">
 
-        {% if history %}
-        <div class="history-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Target IP</th>
-                        <th>Date & Time</th>
-                        <th>Open Ports</th>
-                        <th>Risk Level</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for scan in history %}
-                    <tr>
-                        <td>{{ scan["id"] }}</td>
-                        <td>{{ scan["target_ip"] }}</td>
-                        <td>{{ scan["scan_date"] }}</td>
-                        <td>{{ scan["open_ports"] }}</td>
-                        <td>
-                            <span class="risk-{{ scan['risk_level']|lower }}">
-                                {{ scan["risk_level"] }}
-                            </span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="brand">
+            <span class="brand-icon">🛡</span>
+            <span>NetSecure</span>
         </div>
 
-        {% else %}
-            <p>No scan history available yet.</p>
-        {% endif %}
+        <p class="sidebar-label">MAIN MENU</p>
 
-        <a href="/" class="back-button">Back to Scanner</a>
-    </div>
+        <nav>
+            <a href="/" class="nav-link">▦ Dashboard</a>
+            <a href="/#new-scan" class="nav-link">⌕ New Scan</a>
+            <a href="/history" class="nav-link active">◷ Scan History</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <p>NETWORK SECURITY SCANNER</p>
+            <small>Authorized scanning only</small>
+        </div>
+
+    </aside>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Header -->
+        <header class="dashboard-header">
+
+            <div>
+                <h1>Scan History</h1>
+                <p>Review your previous network security scans and findings.</p>
+            </div>
+
+            <a href="/" class="header-button">
+                ← Back to Dashboard
+            </a>
+
+        </header>
+
+
+        <!-- History Section -->
+        <section class="activity-section">
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Previous Scan Records</h2>
+                    <p>All completed scans are stored in your local database.</p>
+                </div>
+
+                <span class="status-indicator">
+                    ● Scan Records
+                </span>
+
+            </div>
+
+
+            {% if history %}
+
+            <div class="history-table">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Scan ID</th>
+                            <th>Target IP</th>
+                            <th>Date & Time</th>
+                            <th>Open Ports</th>
+                            <th>Risk Level</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for scan in history %}
+
+                        <tr>
+
+                            <td>#{{ scan["id"] }}</td>
+
+                            <td>{{ scan["target_ip"] }}</td>
+
+                            <td>{{ scan["scan_date"] }}</td>
+
+                            <td>
+                                {{ scan["open_ports"] }}
+                            </td>
+
+                            <td>
+                                <span class="risk-badge risk-{{ scan['risk_level']|lower }}">
+                                    {{ scan["risk_level"] }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <a href="{{ url_for('scan_details', scan_id=scan['id']) }}"
+                                   class="details-button">
+                                    View Details →
+                                </a>
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <div class="empty-state">
+
+                <span>◷</span>
+
+                <h3>No Scan History Yet</h3>
+
+                <p>Your completed network scans will appear here.</p>
+
+                <a href="/#new-scan" class="header-button">
+                    Start Your First Scan →
+                </a>
+
+            </div>
+
+            {% endif %}
+
+        </section>
+
+
+        <footer class="dashboard-footer">
+            Network Security Scanner | Built for educational purposes
+        </footer>
+
+    </main>
+
+</div>
 
 </body>
 </html>

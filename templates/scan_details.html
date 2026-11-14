@@ -1,0 +1,246 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Scan Details | NetSecure</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="dashboard">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <span class="brand-icon">🛡</span>
+            <span>NetSecure</span>
+        </div>
+
+        <p class="sidebar-label">MAIN MENU</p>
+
+        <nav>
+            <a href="/" class="nav-link">▦ Dashboard</a>
+            <a href="/#new-scan" class="nav-link">⌕ New Scan</a>
+            <a href="/history" class="nav-link active">◷ Scan History</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <p>NETWORK SECURITY SCANNER</p>
+            <small>Authorized scanning only</small>
+        </div>
+
+    </aside>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Header -->
+        <header class="dashboard-header">
+
+            <div>
+                <h1>Scan Details</h1>
+                <p>Historical network security scan report.</p>
+            </div>
+
+            <a href="/history" class="header-button">
+                ← Back to History
+            </a>
+
+        </header>
+
+
+        <!-- Scan Information -->
+        <section class="activity-section">
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Scan Overview</h2>
+                    <p>Saved information from scan #{{ scan["id"] }}.</p>
+                </div>
+
+                <span class="status-indicator">
+                    ● Historical Record
+                </span>
+
+            </div>
+
+
+            <div class="detail-info-grid">
+
+                <div class="detail-info-card">
+
+                    <span>SCAN ID</span>
+
+                    <h2>#{{ scan["id"] }}</h2>
+
+                </div>
+
+
+                <div class="detail-info-card">
+
+                    <span>TARGET IP ADDRESS</span>
+
+                    <h2>{{ scan["target_ip"] }}</h2>
+
+                </div>
+
+
+                <div class="detail-info-card">
+
+                    <span>OPEN PORTS</span>
+
+                    <h2>{{ scan["open_ports"] }}</h2>
+
+                </div>
+
+
+                <div class="detail-info-card">
+
+                    <span>RISK LEVEL</span>
+
+                    <h2>
+                        <span class="risk-badge risk-{{ scan['risk_level']|lower }}">
+                            {{ scan["risk_level"] }}
+                        </span>
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="scan-timestamp">
+
+                <span>◷</span>
+
+                <div>
+                    <strong>Scan Date & Time</strong>
+                    <p>{{ scan["scan_date"] }}</p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Detected Ports -->
+        <section class="activity-section">
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Detected Open Ports</h2>
+                    <p>Services identified during the original scan.</p>
+                </div>
+
+                <span class="status-indicator">
+                    {{ scan["open_ports"] }} Open Ports
+                </span>
+
+            </div>
+
+
+            {% if scan["results"] %}
+
+            <div class="detail-ports-grid">
+
+                {% for result in scan["results"] %}
+
+                <div class="detail-port-card">
+
+                    <div class="port-card-header">
+
+                        <div>
+                            <span class="port-label">PORT NUMBER</span>
+                            <h2>{{ result["port"] }}</h2>
+                        </div>
+
+                        <span class="port-open-badge">
+                            ● OPEN
+                        </span>
+
+                    </div>
+
+
+                    <div class="port-card-info">
+
+                        <div>
+                            <span>Service</span>
+                            <strong>{{ result["service"] }}</strong>
+                        </div>
+
+                        <div>
+                            <span>Version / Banner</span>
+                            <strong>{{ result.get("version", "Unknown") }}</strong>
+                        </div>
+
+                    </div>
+
+
+                    {% if result.get("warning") %}
+
+                    <div class="port-warning">
+                        ⚠ {{ result["warning"] }}
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <div class="empty-state">
+
+                <span>✓</span>
+
+                <h3>No Open Ports Detected</h3>
+
+                <p>No open ports were identified during this scan.</p>
+
+            </div>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- Footer Actions -->
+       <div class="detail-actions">
+            <a href="/history" class="back-button">
+                ← Back to Scan History
+            </a>
+
+            <a href="{{ url_for('export_scan_csv', scan_id=scan['id']) }}"
+            class="header-button">
+                ↓ Download CSV Report
+            </a>
+
+            <a href="/" class="header-button">
+                Return to Dashboard →
+            </a>
+        </div>
+
+
+        <footer class="dashboard-footer">
+            Network Security Scanner | Historical Scan Report
+        </footer>
+
+    </main>
+
+</div>
+
+</body>
+</html>

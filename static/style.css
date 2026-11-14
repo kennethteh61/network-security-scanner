@@ -785,3 +785,248 @@ body {
 #resultRiskLevel.risk-high {
     color: #fca5a5;
 }
+
+
+/* =========================================
+   SCAN DETAILS BUTTON
+========================================= */
+
+.details-button {
+    display: inline-block;
+    padding: 8px 13px;
+    background: #123b5d;
+    border: 1px solid #0369a1;
+    border-radius: 7px;
+    color: #7dd3fc;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+    transition: 0.2s;
+}
+
+.details-button:hover {
+    background: #075985;
+    border-color: #38bdf8;
+    color: white;
+}
+
+
+/* =========================================
+   HISTORICAL SCAN DETAILS PAGE
+========================================= */
+
+/* Scan overview cards */
+
+.detail-info-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.detail-info-card {
+    background: #0b1120;
+    border: 1px solid #263449;
+    border-radius: 10px;
+    padding: 20px;
+    min-width: 0;
+}
+
+.detail-info-card > span {
+    display: block;
+    color: #64748b;
+    font-size: 11px;
+    letter-spacing: 1px;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.detail-info-card h2 {
+    color: #f8fafc;
+    font-size: 22px;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.detail-info-card .risk-badge {
+    font-size: 12px;
+}
+
+
+/* Scan timestamp */
+
+.scan-timestamp {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #0b1120;
+    border: 1px solid #263449;
+    border-radius: 10px;
+    padding: 17px 20px;
+    margin-top: 18px;
+}
+
+.scan-timestamp > span {
+    font-size: 25px;
+    color: #38bdf8;
+}
+
+.scan-timestamp strong {
+    color: #cbd5e1;
+    font-size: 13px;
+}
+
+.scan-timestamp p {
+    color: #94a3b8;
+    font-size: 13px;
+    margin: 6px 0 0;
+}
+
+
+/* Detected ports grid */
+
+.detail-ports-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.detail-port-card {
+    background: #0b1120;
+    border: 1px solid #263449;
+    border-left: 4px solid #22c55e;
+    border-radius: 10px;
+    padding: 20px;
+    min-width: 0;
+    transition: 0.2s;
+}
+
+.detail-port-card:hover {
+    border-color: #38bdf8;
+    transform: translateY(-2px);
+}
+
+.port-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.port-label {
+    color: #64748b;
+    font-size: 10px;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+
+.port-card-header h2 {
+    color: #38bdf8;
+    font-size: 26px;
+    margin: 7px 0 0;
+}
+
+.port-open-badge {
+    color: #86efac;
+    background: #14532d;
+    border: 1px solid #166534;
+    border-radius: 20px;
+    padding: 6px 10px;
+    font-size: 10px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+
+/* Port service information */
+
+.port-card-info {
+    display: grid;
+    gap: 13px;
+}
+
+.port-card-info div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-top: 1px solid #263449;
+    padding-top: 12px;
+    min-width: 0;
+}
+
+.port-card-info span {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.port-card-info strong {
+    color: #cbd5e1;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+
+/* Port security warning */
+
+.port-warning {
+    background: #422006;
+    border: 1px solid #92400e;
+    border-radius: 7px;
+    padding: 12px;
+    margin-top: 16px;
+    color: #fde68a;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+
+/* Details page navigation */
+
+.detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-top: 25px;
+}
+
+.detail-actions .back-button,
+.detail-actions .header-button {
+    margin-top: 0;
+}
+
+
+/* Responsive layout */
+
+@media (max-width: 1000px) {
+    .detail-info-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .detail-ports-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 450px) {
+    .detail-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-info-card h2 {
+        font-size: 19px;
+    }
+
+    .detail-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .detail-actions a {
+        text-align: center;
+    }
+}

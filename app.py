@@ -1,11 +1,13 @@
-
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, make_response
+import csv
+import io
 from scanner import scan_target
 from database import (
     create_database,
     save_scan,
     get_scan_history,
-    get_dashboard_stats
+    get_dashboard_stats,
+    get_scan_by_id
 )
 
 app = Flask(__name__)
@@ -85,6 +87,62 @@ def history():
         history=scan_history
     )
 
+
+@app.route("/history/<int:scan_id>")
+def scan_details(scan_id): 
+    scan = get_scan_by_id(scan_id)
+
+    if scan is None:
+        return "Scan record not found.", 404
+
+    return render_template(
+        "scan_details.html",
+        scan=scan
+    )
+@app.route("/history/<int:scan_id>/export")
+def export_scan_csv(scan_id):
+    scan = get_scan_by_id(scan_id)
+
+    if scan is None:
+        return "Scan record not found.", 404
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # CSV report heading
+    writer.writerow(["Network Security Scan Report"])
+    writer.writerow(["Scan ID", scan["id"]])
+    writer.writerow(["Target IP", scan["target_ip"]])
+    writer.writerow(["Scan Date", scan["scan_date"]])
+    writer.writerow(["Risk Level", scan["risk_level"]])
+    writer.writerow(["Total Open Ports", scan["open_ports"]])
+    writer.writerow([])
+
+    # Port details
+    writer.writerow([
+        "Port",
+        "Service",
+        "Version",
+        "Status",
+        "Security Warning"
+    ])
+
+    for result in scan["results"]:
+        writer.writerow([
+            result.get("port", "Unknown"),
+            result.get("service", "Unknown"),
+            result.get("version", "Unknown"),
+            result.get("status", "Unknown"),
+            result.get("warning", "None")
+        ])
+
+    response = make_response(output.getvalue())
+    response.headers["Content-Disposition"] = (
+        f"attachment; filename=scan_report_{scan_id}.csv"
+    )
+    response.headers["Content-Type"] = "text/csv; charset=utf-8"
+
+    return response
 
 if __name__ == "__main__":
     app.run(debug=True)
