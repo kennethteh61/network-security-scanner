@@ -1,0 +1,57 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan History | Network Security Scanner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <h1>🛡 Network Security Scanner</h1>
+        <h2>Scan History</h2>
+
+        <p>View your previous network security scans.</p>
+
+        {% if history %}
+        <div class="history-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Target IP</th>
+                        <th>Date & Time</th>
+                        <th>Open Ports</th>
+                        <th>Risk Level</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for scan in history %}
+                    <tr>
+                        <td>{{ scan["id"] }}</td>
+                        <td>{{ scan["target_ip"] }}</td>
+                        <td>{{ scan["scan_date"] }}</td>
+                        <td>{{ scan["open_ports"] }}</td>
+                        <td>
+                            <span class="risk-{{ scan['risk_level']|lower }}">
+                                {{ scan["risk_level"] }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+            <p>No scan history available yet.</p>
+        {% endif %}
+
+        <a href="/" class="back-button">Back to Scanner</a>
+    </div>
+
+</body>
+</html>

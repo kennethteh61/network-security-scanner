@@ -1,48 +1,268 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Network Security Scanner</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Dashboard | Network Security Scanner</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
-    <div class="container">
+<div class="dashboard">
 
-        <h1>🛡 Network Security Scanner</h1>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="brand">
+            <span class="brand-icon">🛡</span>
+            <span>NetSecure</span>
+        </div>
 
-        <p class="subtitle">
-            Scan an authorized target for open network ports
-            and potential security issues.
-        </p>
+        <p class="sidebar-label">MAIN MENU</p>
 
-        <div class="scan-box">
+        <nav>
+            <a href="/" class="nav-link active">▦ Dashboard</a>
+            <a href="#new-scan" class="nav-link">⌕ New Scan</a>
+            <a href="/history" class="nav-link">◷ Scan History</a>
+        </nav>
 
-            <h2>Start a Scan</h2>
+        <div class="sidebar-bottom">
+            <p>NETWORK SECURITY SCANNER</p>
+            <small>Authorized scanning only</small>
+        </div>
+    </aside>
 
-            <form action="/scan" method="GET">
 
-                <label for="target">Target IP Address</label>
+    <!-- Main Content -->
+    <main class="main-content">
 
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div>
+                <h1>Security Dashboard</h1>
+                <p>Monitor your network scanning activities and security findings.</p>
+            </div>
+
+            <a href="/history" class="header-button">View Scan History →</a>
+        </header>
+
+
+        <!-- Statistics -->
+        <section class="stats-grid" id="dashboard">
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span>Total Scans</span>
+                    <span class="stat-icon blue">⌕</span>
+                </div>
+                <h2>{{ stats.total_scans }}</h2>
+                <p>Scans performed</p>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span>Open Ports</span>
+                    <span class="stat-icon cyan">◉</span>
+                </div>
+                <h2>{{ stats.total_open_ports }}</h2>
+                <p>Ports detected</p>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span>High-Risk Scans</span>
+                    <span class="stat-icon red">⚠</span>
+                </div>
+                <h2>{{ stats.high_risk_scans }}</h2>
+                <p>Scans classified as high risk</p>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span>Unique Targets</span>
+                    <span class="stat-icon purple">◎</span>
+                </div>
+                <h2>{{ stats.unique_targets }}</h2>
+                <p>Different IP addresses scanned</p>
+            </div>
+
+        </section>
+
+
+        <!-- New Scan -->
+        <section class="scan-section" id="new-scan">
+
+            <div class="section-heading">
+                <div>
+                    <h2>Start a New Scan</h2>
+                    <p>Enter an authorized IPv4 address to check its common ports.</p>
+                </div>
+                <span class="status-indicator">● Scanner Ready</span>
+            </div>
+
+            <form action="/scan" method="GET" id="scanForm" class="dashboard-form">
                 <input
                     type="text"
-                    id="target"
                     name="target"
-                    placeholder="192.168.56.101"
+                    placeholder="Enter target IP address (e.g. 192.168.56.101)"
                     required
                 >
 
-                <button type="submit">Start Scan</button>
-
+                <button type="submit" id="scanButton">
+                    Start Scan →
+                </button>
             </form>
 
+            <p class="scan-notice">
+                Only scan systems you own or have permission to test.
+            </p>
+
+        </section>
+
+
+<!-- Risk Distribution Chart -->
+<section class="activity-section">
+
+    <div class="section-heading">
+        <div>
+            <h2>Risk Distribution</h2>
+            <p>Breakdown of security risk levels across all scans.</p>
         </div>
-
-        <p class="notice">
-            Only scan systems you own or have permission to test.
-        </p>
-
     </div>
+
+    <div class="chart-container">
+        <canvas id="riskChart"></canvas>
+    </div>
+
+</section>
+
+        <!-- Recent Activity -->
+        <section class="activity-section">
+
+            <div class="section-heading">
+                <div>
+                    <h2>Recent Scan Activity</h2>
+                    <p>Your five most recent scanning records.</p>
+                </div>
+
+                <a href="/history" class="view-all">View All →</a>
+            </div>
+
+            {% if stats.recent_scans %}
+
+            <div class="activity-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Target IP</th>
+                            <th>Date & Time</th>
+                            <th>Open Ports</th>
+                            <th>Risk Level</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for scan in stats.recent_scans %}
+                        <tr>
+                            <td>{{ scan["target_ip"] }}</td>
+                            <td>{{ scan["scan_date"] }}</td>
+                            <td>{{ scan["open_ports"] }}</td>
+                            <td>
+                                <span class="risk-badge risk-{{ scan['risk_level']|lower }}">
+                                    {{ scan["risk_level"] }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% else %}
+
+            <div class="empty-state">
+                <span>◷</span>
+                <h3>No Scan Activity Yet</h3>
+                <p>Your previous scans will appear here.</p>
+            </div>
+
+            {% endif %}
+
+        </section>
+
+
+        <footer class="dashboard-footer">
+            Network Security Scanner | Built for educational purposes
+        </footer>
+
+    </main>
+
+</div>
+
+
+<!-- Scanning Button Animation -->
+<script>
+    document.getElementById("scanForm").addEventListener("submit", function() {
+        const button = document.getElementById("scanButton");
+
+        button.textContent = "Scanning...";
+        button.disabled = true;
+    });
+</script>
+
+
+<script>
+    const riskData = {{ stats.risk_distribution | tojson }};
+
+    const riskChart = document.getElementById("riskChart");
+
+    new Chart(riskChart, {
+        type: "doughnut",
+
+        data: {
+            labels: ["Low Risk", "Medium Risk", "High Risk"],
+
+            datasets: [{
+                data: [
+                    riskData.LOW,
+                    riskData.MEDIUM,
+                    riskData.HIGH
+                ],
+
+                backgroundColor: [
+                    "#22c55e",
+                    "#eab308",
+                    "#ef4444"
+                ],
+
+                borderColor: "#151f32",
+                borderWidth: 4,
+                hoverOffset: 8
+            }]
+        },
+
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            plugins: {
+                legend: {
+                    position: "bottom",
+
+                    labels: {
+                        color: "#cbd5e1",
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                }
+            },
+
+            cutout: "70%"
+        }
+    });
+</script>
 
 </body>
 </html>
